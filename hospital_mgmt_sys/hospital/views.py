@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login, logout as auth_logout
+from .models import Doctor
 
 from django.contrib import messages, auth
 
@@ -18,6 +19,31 @@ def contact(request):
 def index(request):
     return render(request, 'index.html')
 
+def view_doctor(request):
+    if not request.user.is_staff:
+        return render(request, 'login.html')
+    doctor = Doctor.objects.all()
+    doc = {'doctor': doctor}
+    return render(request, 'view_doctor.html', doc)
+
+def delete_doctor(request, pk):
+    if not request.user.is_staff:
+        return render(request, 'login.html')
+    doctor = Doctor.objects.get(id=pk)
+    doctor.delete()
+    return redirect('view_doctor')
+
+def add_doctor(request):
+    if not request.user.is_staff:
+        return redirect('login')
+    if request.method == "POST":
+        name = request.POST["name"]
+        phone = request.POST["phone"]
+        special = request.POST["special"]
+        
+        Doctor.objects.create(name = name, phone = phone, special = special)
+    
+    return render(request, 'add_doctor.html')
 
 def login_view(request):
     if request.method == "POST":
