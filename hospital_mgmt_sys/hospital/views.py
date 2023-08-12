@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from .models import Doctor
+from .models import Doctor, Patient
 
 from django.contrib import messages, auth
 
@@ -42,8 +42,41 @@ def add_doctor(request):
         special = request.POST["special"]
         
         Doctor.objects.create(name = name, phone = phone, special = special)
+        return redirect('view_doctor')
     
     return render(request, 'add_doctor.html')
+
+
+def add_patient(request):
+    if not request.user.is_staff:
+        return redirect('login')
+    if request.method == 'POST':
+        name = request.POST["name"]
+        phone = request.POST["phone"]
+        gender = request.POST["gender"]
+        age = request.POST["age"]
+        problem = request.POST["problem"]
+
+        Patient.objects.create(name = name, phone = phone, gender = gender, age = age, problem = problem)
+        return redirect('view_patient')
+
+    return render(request, 'add_patient.html')
+
+
+def view_patient(request):
+    if not request.user.is_staff:
+        return render(request, 'login.html')
+    patient = Patient.objects.all()
+    pat = {'patient': patient}
+    return render(request, 'view_patient.html', pat)
+
+
+def delete_patient(request, pk):
+    if not request.user.is_staff:
+        return render(request, 'login.html')
+    patient = Patient.objects.get(id=pk)
+    patient.delete()
+    return redirect('view_patient')
 
 def login_view(request):
     if request.method == "POST":
