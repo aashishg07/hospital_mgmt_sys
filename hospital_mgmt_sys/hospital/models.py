@@ -29,11 +29,11 @@ class Patient(models.Model):
 
 
 class Appointment(models.Model):
-    doctor = models.ForeignKey(Doctor, related_name="doctor", on_delete=models.CASCADE)
-    patient = models.ForeignKey(Patient, related_name="patient", on_delete=models.CASCADE)
+    doctor_app = models.ForeignKey(Doctor, related_name="doctor", on_delete=models.CASCADE)
+    patient_app = models.ForeignKey(Patient, related_name="patient", on_delete=models.CASCADE)
     date = models.DateField(auto_now=True)
     time = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return self.patient
+        return self.doctor.name + " " + self.patient.name
 

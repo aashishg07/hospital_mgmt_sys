@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, logout
 from django.contrib.auth import login as auth_login, logout as auth_logout
-from .models import Doctor, Patient
+from .models import Doctor, Patient, Appointment
 
 from django.contrib import messages, auth
 
@@ -77,6 +77,46 @@ def delete_patient(request, pk):
     patient = Patient.objects.get(id=pk)
     patient.delete()
     return redirect('view_patient')
+
+
+def add_appointment(request):
+    if not request.user.is_staff:
+        return redirect('login')
+    
+    doctor1 = Doctor.objects.all()
+    patient1 = Patient.objects.all()
+
+    if request.method == "POST":
+        doctor = request.POST["doctor"]
+        patient = request.POST["patient"]
+        date = request.POST["date"]
+        time = request.POST["time"]
+
+        doctor2 = Doctor.objects.filter(name = doctor).first()
+        patient2 = Patient.objects.filter(name = patient).first()
+
+        Appointment.objects.create(doctor_app = doctor2, patient_app = patient2, date = date, time = time)
+
+        return redirect('view_appointment')
+    
+    appointment = {'doctor': doctor1, 'patient': patient1}
+    return render(request, 'add_appointment.html', appointment)
+
+
+def view_appointment(request):
+    if not request.user.is_staff:
+        return redirect('login')
+    appointment = Appointment.objects.all()
+    app = {'appointment':appointment}
+    return render(request, 'view_appointment.html', app)
+
+def delete_appointment(request, pk):
+    if not request.user.is_staff:
+        return redirect('login')
+    app = Appointment.objects.get(id=pk)
+    app.delete()
+    return redirect('view_appointment')
+
 
 def login_view(request):
     if request.method == "POST":
